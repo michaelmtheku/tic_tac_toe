@@ -1,87 +1,112 @@
-const gameBoard = (() => {
-    const board = ['', '', '', '', '', '', '', '', ''];
-    return {board}
-})();
+const vsButtons = document.querySelector('.vs-button');
+const twoPlayers = document.getElementById('twoPlayers');
+const vsComputer = document.getElementById('vsComputer');
+const twoPlayersSection = document.querySelector('.two-players');
+const vsComputerSection = document.querySelector('.vs-computer');
+const restartButton = document.getElementById('restartButton')
 
-const player = (name, symbol) => {
-    return {name,symbol}
+function twoPlayersGame() {
+    twoPlayersSection.style.display = "";
+    vsComputerSection.remove();
+    vsButtons.style.display = "none";
+    restartButton.style.display = "";
+}
+twoPlayers.addEventListener('click', twoPlayersGame);
+
+function vsComputerGame() {
+    vsComputerSection.style.display = "";
+    twoPlayersSection.remove();
+    vsButtons.style.display = "none";
+    restartButton.style.display = "";
+}
+vsComputer.addEventListener('click', vsComputerGame);
+
+
+let currentPlayer = 'X';
+let board = [['', '', ''], ['', '', ''], ['', '', '']];
+let gameOver = false;
+
+function twoPMakeMove(row, col) {
+    if (!gameOver && board[row][col] === '') {
+        board[row][col] = currentPlayer;
+        document.querySelector(`.row:nth-child(${row + 1}) .cell:nth-child(${col + 1}`).textContent = currentPlayer;
+        
+        if (checkWin()) {
+            document.getElementById('twoPlayersWinnerText').textContent = `${currentPlayer} wins!`;
+            gameOver = true;
+        } else if (checkTie()) {
+            document.getElementById('twoPlayersWinnerText').textContent = "It's a tie!";
+            gameOver = true;
+        } else {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        }
+    }
 }
 
-const player1 = player('Player 1', 'X');
-const player2 = player('Player 2', 'O');
+function vsComMakeMove(row, col) {
+    if (!gameOver && board[row][col] === '') {
+        board[row][col] = currentPlayer;
+        document.querySelector(`.row:nth-child(${row + 1}) .cell:nth-child(${col + 1}`).textContent = currentPlayer;
 
-const playGame = (() =>{
-    const {board} = gameBoard;
-   
-    let symbol = ''; 
-    let winningPlayer = '';
-    const markSpot = (e) => { 
-        console.log("start symbol:", symbol);
-        const targetArrayIndex = board[`${e.target.id}`]; console.log(e.target); //sets the board square to the corrosponding array index
-        if (symbol === '') {
-            symbol = player1.symbol;  console.log(symbol);
-            if (targetArrayIndex === '') {board.splice(`${e.target.id}`,1, symbol)}; console.log(board);
-        }else if (symbol === player1.symbol) {
-            symbol = player2.symbol; console.log(symbol);
-            winningPlayer = player2.name;
-            if (targetArrayIndex === '') {board.splice(`${e.target.id}`,1, symbol)}; console.log(board);
-        }else if (symbol === player2.symbol) {
-            symbol = player1.symbol; console.log(symbol);
-            winningPlayer = player1.name;
-            if (targetArrayIndex === '') {board.splice(`${e.target.id}`,1, symbol)}; console.log(board);
+        if (checkWin()) {
+            document.getElementById('vsComputerWinnerText').textContent = `${currentPlayer} wins!`;
+            gameOver = true;
+        } else if (checkTie()) {
+            document.getElementById('vsComputerWinnerText').textContent = "It's a tie!";
+            gameOver = true;
+        } else {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+
+            if (!gameOver && currentPlayer === 'O') {
+                setTimeout(makeComputerMove, 500); 
+            }
         }
-        const {renderMoves} = renderAndRest;
-        renderMoves();
-        checkWinner();
+    }
+}
+
+
+function makeComputerMove() {
+    if (!gameOver) {
+        let row, col;
+        do {
+            row = Math.floor(Math.random() * 3);
+            col = Math.floor(Math.random() * 3);
+        } while (board[row][col] !== '');
+        
+        vsComMakeMove(row, col);
+    }
+}
+
+function checkWin() {
+    for (let i = 0; i < 3; i++) {
+        if (
+            (board[i][0] === currentPlayer && board[i][1] === currentPlayer && board[i][2] === currentPlayer) ||
+            (board[0][i] === currentPlayer && board[1][i] === currentPlayer && board[2][i] === currentPlayer)
+        ) {
+            return true;
+        }
     }
     
-    function checkWinner() {
-        if (board[0] === board[1] && board[1] === board[2] && board[0] !== '') {removeClick(); winner.textContent= `${winningPlayer} Wins!`; symbol = ''; return;} 
-        if (board[3] === board[4] && board[4] === board[5] && board[3] !== '') {removeClick(); winner.textContent= `${winningPlayer} Wins!`; symbol = ''; return;} 
-        if (board[6] === board[7] && board[7] === board[8] && board[6] !== '') {removeClick(); winner.textContent= `${winningPlayer} Wins!`; symbol = ''; return;}
-        if (board[0] === board[3] && board[3] === board[6] && board[0] !== '') {removeClick(); winner.textContent= `${winningPlayer} Wins!`; symbol = ''; return;}
-        if (board[1] === board[4] && board[4] === board[7] && board[1] !== '') {removeClick(); winner.textContent= `${winningPlayer} Wins!`; symbol = ''; return;}
-        if (board[2] === board[5] && board[5] === board[8] && board[2] !== '') {removeClick(); winner.textContent= `${winningPlayer} Wins!`; symbol = ''; return;}
-        if (board[0] === board[4] && board[4] === board[8] && board[0] !== '') {removeClick(); winner.textContent= `${winningPlayer} Wins!`; symbol = ''; return;}
-        if (board[2] === board[4] && board[4] === board[6] && board[2] !== '') {removeClick(); winner.textContent= `${winningPlayer} Wins!`; symbol = ''; return;}
-        if (board[0] !== '' && board[1] !== '' && board[2] !== '' && board[3] !== '' && board[4] !== '' && board[5] !== '' && board[6] !== '' && board[7] !== '' && board[8] !== '') {winner.textContent = "DRAW!"};
+    if (
+        (board[0][0] === currentPlayer && board[1][1] === currentPlayer && board[2][2] === currentPlayer) ||
+        (board[0][2] === currentPlayer && board[1][1] === currentPlayer && board[2][0] === currentPlayer)
+    ) {
+        return true;
     }
-    const spots = Array.from(document.getElementsByClassName('box'));
+    
+    return false;
+}
 
-    function removeClick() {
-        spots.forEach((box) => box.removeEventListener('click', markSpot)); //removed click event listener 
-    }
-
-    function addClick() {
-        spots.forEach((box) => box.addEventListener('click', markSpot));
-    }
-    addClick();
-
-    return {addClick}
-})();
-
-
-const renderAndRest = (() => {
-    const {board} = gameBoard;
-    const {addClick} = playGame;
-
-    function renderMoves() {
-        for (let i=0; i<board.length; i++){
-            const targetBox = document.getElementById(`${i}`);
-            targetBox.textContent = board[i]; 
+function checkTie() {
+    for (let row of board) {
+        if (row.includes('')) {
+            return false;
         }
     }
-   
-    const resetBtn = document.getElementById('resetBtn');
+    return true;
+}
 
-    resetBtn.addEventListener('click', () => {
-        for (let i=0; i<board.length; i++){
-            board[i] = '';
-        }
-        winner.textContent = 'May The Best Player Win!';
-        addClick();
-        renderMoves();
-    });
-
-    return {renderMoves}
-})();
+function restartGame() {
+    location.reload();
+}
+restartButton.addEventListener('click', restartGame);
